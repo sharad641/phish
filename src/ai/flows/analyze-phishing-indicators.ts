@@ -119,6 +119,16 @@ const analyzePhishingIndicatorsFlow = ai.defineFlow<
   },
   async input => {
     try {
+      // Check if both text and photoDataUri are empty
+      if (!input.text && !input.photoDataUri) {
+        return {
+          isPhishing: false,
+          indicators: [],
+          safetyScore: 1,
+          explanation: "No text or image provided for analysis."
+        };
+      }
+
       const {output} = await prompt(input);
       return output!;
     } catch (error) {

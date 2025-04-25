@@ -230,18 +230,6 @@ export default function Home() {
                   </>
                 )}
               </Button>
-
-               {analysisResult && (
-                  <Button
-                      variant="outline"
-                      onClick={handleClearAnalysis}
-                      disabled={loading}
-                      className="rounded-md shadow-sm hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors duration-200"
-                  >
-                    <XCircle className="mr-2 h-4 w-4" />
-                    Clear Analysis
-                  </Button>
-              )}
             </div>
           </div>
 
@@ -330,3 +318,4 @@ export default function Home() {
     </div>
   );
 }
+

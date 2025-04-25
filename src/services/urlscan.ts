@@ -19,10 +19,16 @@ export interface URLScanResult {
  * @returns A promise that resolves to a URLScanResult object.
  */
 export async function scanURL(url: string): Promise<URLScanResult> {
-  // TODO: Implement this by calling an API.
+  // Mock Implementation: for now is a mock, but it should be replaced to a real implementation in the future
+  if (url.includes('suspicious')) {
+    return {
+      isSafe: false,
+      message: 'URL is potentially malicious (Mock VirusTotal result).',
+    };
+  }
 
   return {
     isSafe: true,
-    message: 'URL is safe.',
+    message: 'URL is safe (Mock VirusTotal result).',
   };
 }

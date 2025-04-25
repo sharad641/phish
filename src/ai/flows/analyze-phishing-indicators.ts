@@ -11,6 +11,8 @@
 import {ai} from '@/ai/ai-instance';
 import {scanURL} from '@/services/urlscan';
 import {z} from 'genkit';
+import {readEmlFile} from '@/services/emlReader';
+import {extractTextFromImage} from '@/services/ocrService';
 
 const AnalyzePhishingIndicatorsInputSchema = z.object({
   text: z.string().describe('The email or message content to analyze.').optional(),
@@ -20,6 +22,13 @@ const AnalyzePhishingIndicatorsInputSchema = z.object({
       "A photo to analyze, as a data URI that must include a MIME type and use Base64 encoding. Expected format: 'data:<mimetype>;base64,<encoded_data>'."
     )
     .nullable() // Allow null for photoDataUri
+    .optional(),
+  emlFileDataUri: z
+    .string()
+    .describe(
+      "An .eml email file as a data URI that must include a MIME type and use Base64 encoding. Expected format: 'data:<mimetype>;base64,<encoded_data>'."
+    )
+    .nullable()
     .optional(),
 });
 
@@ -31,11 +40,17 @@ const AnalyzePhishingIndicatorsOutputSchema = z.object({
   isPhishing: z.boolean().describe('Whether the content is likely a phishing attempt.'),
   indicators: z
     .array(z.string())
-    .describe('Specific indicators found in the content.'),
+    .describe('Specific indicators found in the content, such as urgency cues, suspicious domains, emotional language, and spoof indicators.'),
   safetyScore: z
     .number()
     .describe('A score from 0 to 1 indicating the safety of the content.'),
   explanation: z.string().describe('An explanation of why the content is phishing.'),
+  threatLevel: z
+    .enum(['Safe', 'Suspicious', 'Dangerous'])
+    .describe('A threat level indicating the overall risk associated with the content.'),
+  riskFactors: z
+    .array(z.string())
+    .describe('Specific risk factors detected in the content, such as urgency words, suspicious domains, emotional language, and spoof indicators.'),
 });
 
 export type AnalyzePhishingIndicatorsOutput = z.infer<
@@ -46,21 +61,40 @@ export async function analyzePhishingIndicators(
   input: AnalyzePhishingIndicatorsInput
 ): Promise<AnalyzePhishingIndicatorsOutput> {
   try {
-    // Check if both text and photoDataUri are empty
-    if (!input.text && !input.photoDataUri) {
+    // Check if all content inputs are empty
+    if (!input.text && !input.photoDataUri && !input.emlFileDataUri) {
       return {
         isPhishing: false,
         indicators: [],
         safetyScore: 1,
-        explanation: "No text or image provided for analysis."
+        explanation: 'No content provided for analysis.',
+        threatLevel: 'Safe',
+        riskFactors: [],
       };
     }
-    return await analyzePhishingIndicatorsFlow(input);
+
+    let extractedText = input.text || '';
+
+    // If an image is provided, extract text using OCR
+    if (input.photoDataUri) {
+      const ocrText = await extractTextFromImage(input.photoDataUri);
+      extractedText += `\nImage Text: ${ocrText}`;
+    }
+
+    // If an EML file is provided, parse it and scan the body + headers
+    if (input.emlFileDataUri) {
+      const emlContent = await readEmlFile(input.emlFileDataUri);
+      extractedText += `\nEmail Content: ${emlContent}`;
+    }
+
+    const enrichedInput = { ...input, text: extractedText };
+
+    return await analyzePhishingIndicatorsFlow(enrichedInput);
   } catch (error: any) {
-    console.error("Error in analyzePhishingIndicators:", error);
-    let errorMessage = "Failed to analyze content. Please try again.";
+    console.error('Error in analyzePhishingIndicators:', error);
+    let errorMessage = 'Failed to analyze content. Please try again.';
     if (error instanceof Error) {
-        errorMessage = error.message;
+      errorMessage = error.message;
     }
     throw new Error(errorMessage);
   }
@@ -91,6 +125,13 @@ const prompt = ai.definePrompt({
         )
         .nullable()
         .optional(),
+      emlFileDataUri: z
+        .string()
+        .describe(
+          "An .eml email file as a data URI that must include a MIME type and use Base64 encoding. Expected format: 'data:<mimetype>;base64,<encoded_data>'."
+        )
+        .nullable()
+        .optional(),
     }),
   },
   output: {
@@ -100,31 +141,50 @@ const prompt = ai.definePrompt({
         .describe('Whether the content is likely a phishing attempt.'),
       indicators: z
         .array(z.string())
-        .describe('Specific indicators found in the content.'),
+        .describe('Specific indicators found in the content, such as urgency cues, suspicious domains, emotional language, and spoof indicators.'),
       safetyScore: z
         .number()
         .describe('A score from 0 to 1 indicating the safety of the content.'),
       explanation: z.string().describe('An explanation of why the content is phishing.'),
+      threatLevel: z
+        .enum(['Safe', 'Suspicious', 'Dangerous'])
+        .describe('A threat level indicating the overall risk associated with the content.'),
+      riskFactors: z
+        .array(z.string())
+        .describe('Specific risk factors detected in the content, such as urgency words, suspicious domains, emotional language, and spoof indicators.'),
     }),
   },
-  prompt: `You are an AI assistant specializing in detecting phishing attempts.
+  prompt: `You are an AI assistant specializing in detecting phishing attempts and social engineering tactics.
 
-Analyze the following text and image (if available) for potential phishing indicators, such as suspicious keywords, urgency cues, unusual formatting, and deceptive imagery. Also, if there are any URLs, use the scanURL tool to determine if the URLs are safe.
+Analyze the following content for potential phishing indicators. Identify and list specific risk factors such as:
+- Urgency cues (e.g., "act immediately", "urgent action required")
+- Suspicious domains (e.g., unusual or misspelled URLs)
+- Emotional language (e.g., threats, promises of reward)
+- Spoof indicators (e.g., mismatched sender information, generic greetings)
+
+For any URLs found, use the scanURL tool to determine if they are safe.
+
+Based on your analysis, determine if the content is likely a phishing attempt and provide a safety score between 0 and 1, where 0 is definitely phishing and 1 is definitely safe. Also, provide a threat level as Safe, Suspicious, or Dangerous. Explain your reasoning.
 
 {{#if text}}
 Text: {{{text}}}
 {{else}}
 No text provided.
 {{/if}}
+
 {{#if photoDataUri}}
 Image: {{media url=photoDataUri}}
 {{else}}
 No image provided.
 {{/if}}
 
-Based on your analysis, determine if the content is likely a phishing attempt. Provide a safety score between 0 and 1, where 0 is definitely phishing and 1 is definitely safe. Explain your reasoning.
+{{#if emlFileDataUri}}
+Email File: {{emlFileDataUri}}
+{{else}}
+No email file provided.
+{{/if}}
 
-Output the isPhishing boolean, a list of indicators, the safetyScore and the explanation.
+Output the isPhishing boolean, a list of indicators, the safetyScore, threatLevel, riskFactors, and the explanation.
 `,
   tools: [analyzeURLTool],
 });
@@ -142,12 +202,12 @@ const analyzePhishingIndicatorsFlow = ai.defineFlow<
     try {
       const {output} = await prompt(input);
       if (!output) {
-        throw new Error("LLM analysis failed to produce a valid output.");
+        throw new Error('LLM analysis failed to produce a valid output.');
       }
       return output!;
     } catch (error: any) {
-      console.error("Error in analyzePhishingIndicatorsFlow:", error);
-      throw new Error("Failed to analyze content in flow. Please try again.");
+      console.error('Error in analyzePhishingIndicatorsFlow:', error);
+      throw new Error('Failed to analyze content in flow. Please try again.');
     }
   }
 );

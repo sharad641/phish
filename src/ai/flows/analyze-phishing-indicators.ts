@@ -5,7 +5,7 @@
  *
  * - analyzePhishingIndicators - A function that analyzes text and images for phishing indicators.
  * - AnalyzePhishingIndicatorsInput - The input type for the analyzePhishingIndicators function.
- * - AnalyzePhishingIndicatorsOutput - The return type for the analyzePhishingIndicators function.
+ * - AnalyzePhishingIndicatorsOutput - The return type for the AnalyzePhishingIndicators function.
  */
 
 import {ai} from '@/ai/ai-instance';
@@ -45,10 +45,23 @@ export async function analyzePhishingIndicators(
   input: AnalyzePhishingIndicatorsInput
 ): Promise<AnalyzePhishingIndicatorsOutput> {
   try {
+    // Check if both text and photoDataUri are empty
+    if (!input.text && !input.photoDataUri) {
+      return {
+        isPhishing: false,
+        indicators: [],
+        safetyScore: 1,
+        explanation: "No text or image provided for analysis."
+      };
+    }
     return await analyzePhishingIndicatorsFlow(input);
-  } catch (error) {
+  } catch (error: any) {
     console.error("Error in analyzePhishingIndicators:", error);
-    throw new Error("Failed to analyze content. Please try again.");
+    let errorMessage = "Failed to analyze content. Please try again.";
+    if (error instanceof Error) {
+        errorMessage = error.message;
+    }
+    throw new Error(errorMessage);
   }
 }
 
@@ -96,9 +109,15 @@ const prompt = ai.definePrompt({
 
 Analyze the following text and image (if available) for potential phishing indicators, such as suspicious keywords, urgency cues, unusual formatting, and deceptive imagery. Also, if there are any URLs, use the scanURL tool to determine if the URLs are safe.
 
+{{#if text}}
 Text: {{{text}}}
+{{else}}
+No text provided.
+{{/if}}
 {{#if photoDataUri}}
 Image: {{media url=photoDataUri}}
+{{else}}
+No image provided.
 {{/if}}
 
 Based on your analysis, determine if the content is likely a phishing attempt. Provide a safety score between 0 and 1, where 0 is definitely phishing and 1 is definitely safe. Explain your reasoning.
@@ -119,19 +138,12 @@ const analyzePhishingIndicatorsFlow = ai.defineFlow<
   },
   async input => {
     try {
-      // Check if both text and photoDataUri are empty
-      if (!input.text && !input.photoDataUri) {
-        return {
-          isPhishing: false,
-          indicators: [],
-          safetyScore: 1,
-          explanation: "No text or image provided for analysis."
-        };
-      }
-
       const {output} = await prompt(input);
+      if (!output) {
+        throw new Error("LLM analysis failed to produce a valid output.");
+      }
       return output!;
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error in analyzePhishingIndicatorsFlow:", error);
       throw new Error("Failed to analyze content in flow. Please try again.");
     }

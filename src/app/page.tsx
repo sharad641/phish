@@ -5,7 +5,7 @@ import {Card, CardContent, CardDescription, CardHeader, CardTitle} from "@/compo
 import {Input} from "@/components/ui/input";
 import {Button} from "@/components/ui/button";
 import {Alert, AlertDescription, AlertTitle} from "@/components/ui/alert";
-import {Scan, ShieldAlert, ImagePlus, FileText} from "lucide-react";
+import {Scan, ShieldAlert, ImagePlus, FileText, XCircle} from "lucide-react";
 import {analyzePhishingIndicators} from "@/ai/flows/analyze-phishing-indicators";
 import {Toaster} from "@/components/ui/toaster";
 import {useToast} from "@/hooks/use-toast";
@@ -100,6 +100,14 @@ export default function Home() {
       setLoading(false);
     }
   };
+
+  const handleClearAnalysis = () => {
+    setInputText("");
+    setSelectedImage(null);
+    setSelectedEmlFile(null);
+    setAnalysisResult(null);
+  };
+
 
   const getProgressBarColor = () => {
     if (analysisResult?.threatLevel === "Dangerous") {
@@ -208,19 +216,33 @@ export default function Home() {
               )}
             </div>
 
-            <Button
-              onClick={handleAnalyze}
-              disabled={loading}
-              className="bg-blue-500 text-white rounded-md shadow-md hover:bg-blue-600 transition-colors duration-300"
-            >
-              {loading ? (
-                "Analyzing..."
-              ) : (
-                <>
-                  <Scan className="mr-2 h-4 w-4"/> Analyze
-                </>
+            <div className="flex space-x-2">
+              <Button
+                onClick={handleAnalyze}
+                disabled={loading}
+                className="bg-blue-500 text-white rounded-md shadow-md hover:bg-blue-600 transition-colors duration-300"
+              >
+                {loading ? (
+                  "Analyzing..."
+                ) : (
+                  <>
+                    <Scan className="mr-2 h-4 w-4"/> Analyze
+                  </>
+                )}
+              </Button>
+
+               {analysisResult && (
+                  <Button
+                      variant="outline"
+                      onClick={handleClearAnalysis}
+                      disabled={loading}
+                      className="rounded-md shadow-sm hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors duration-200"
+                  >
+                    <XCircle className="mr-2 h-4 w-4" />
+                    Clear Analysis
+                  </Button>
               )}
-            </Button>
+            </div>
           </div>
 
           {transitions((style, item) =>
@@ -308,3 +330,4 @@ export default function Home() {
     </div>
   );
 }
+

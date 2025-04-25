@@ -44,7 +44,12 @@ export type AnalyzePhishingIndicatorsOutput = z.infer<
 export async function analyzePhishingIndicators(
   input: AnalyzePhishingIndicatorsInput
 ): Promise<AnalyzePhishingIndicatorsOutput> {
-  return analyzePhishingIndicatorsFlow(input);
+  try {
+    return await analyzePhishingIndicatorsFlow(input);
+  } catch (error) {
+    console.error("Error in analyzePhishingIndicators:", error);
+    throw new Error("Failed to analyze content. Please try again.");
+  }
 }
 
 const analyzeURLTool = ai.defineTool({
@@ -113,7 +118,12 @@ const analyzePhishingIndicatorsFlow = ai.defineFlow<
     outputSchema: AnalyzePhishingIndicatorsOutputSchema,
   },
   async input => {
-    const {output} = await prompt(input);
-    return output!;
+    try {
+      const {output} = await prompt(input);
+      return output!;
+    } catch (error) {
+      console.error("Error in analyzePhishingIndicatorsFlow:", error);
+      throw new Error("Failed to analyze content in flow. Please try again.");
+    }
   }
 );

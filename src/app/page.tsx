@@ -8,11 +8,13 @@ import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Scan, ShieldAlert } from "lucide-react";
 import { analyzePhishingIndicators } from "@/ai/flows/analyze-phishing-indicators";
 import { Toaster } from "@/components/ui/toaster";
+import { useToast } from "@/hooks/use-toast";
 
 export default function Home() {
-  const [inputText, setInputText] = useState("");
+  const [inputText, setInputText] = useState("Dear Customer,\n\nWe have noticed suspicious activity on your account. Please log in immediately to verify your details:\n\n[Suspicious Link]\n\nThank you for your prompt attention to this matter.\n\nSincerely,\nYour Bank");
   const [analysisResult, setAnalysisResult] = useState(null);
   const [loading, setLoading] = useState(false);
+	const { toast } = useToast();
 
   const handleAnalyze = async () => {
     setLoading(true);
@@ -21,11 +23,11 @@ export default function Home() {
       setAnalysisResult(result);
     } catch (error) {
       console.error("Error analyzing text:", error);
-      // toast({  // toast is now in useToast hook
-      //   title: "Error",
-      //   description: "Failed to analyze content. Please try again.",
-      //   variant: "destructive",
-      // });
+      toast({  // toast is now in useToast hook
+        title: "Error",
+        description: "Failed to analyze content. Please try again.",
+        variant: "destructive",
+      });
     } finally {
       setLoading(false);
     }

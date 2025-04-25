@@ -1,3 +1,4 @@
+/* Tailwind CSS styles */
 
 @tailwind base;
 @tailwind components;
@@ -87,3 +88,4 @@ body {
     @apply bg-background text-foreground;
   }
 }
+

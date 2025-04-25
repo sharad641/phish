@@ -254,15 +254,15 @@ export default function Home() {
                     <AlertTitle className="dark:text-red-50">Potential Phishing Threat Detected</AlertTitle>
                     <AlertDescription className="dark:text-red-200">
                       This content has been flagged as potentially malicious with a safety score of{" "}
-                      {analysisResult.safetyScore?.toFixed(2)}.
+                      {analysisResult.safetyScore?.toFixed(2) ?? '0.00'}.
                       <br/>
                       <strong className="font-bold">Threat Level:</strong> <span className={threatColors[analysisResult.threatLevel]}>{analysisResult.threatLevel}</span>
                       <br/>
-                      <strong>Indicators:</strong> {analysisResult.indicators?.join(", ")}
+                      <strong>Indicators:</strong> {analysisResult.indicators?.join(", ") ?? 'No indicators found.'}
                       <br/>
-                      <strong>Risk Factors:</strong> {analysisResult.riskFactors?.join(", ")}
+                      <strong>Risk Factors:</strong> {analysisResult.riskFactors?.join(", ") ?? 'No risk factors found.'}
                       <br/>
-                      <strong>Explanation:</strong> {analysisResult.explanation}
+                      <strong>Explanation:</strong> {analysisResult.explanation ?? 'No explanation provided.'}
                     </AlertDescription>
                   </Alert>
                 ) : (
@@ -270,24 +270,24 @@ export default function Home() {
                     <ShieldAlert className="h-4 w-4"/>
                     <AlertTitle className="dark:text-green-50">Content Appears Safe</AlertTitle>
                     <AlertDescription className="dark:text-green-200">
-                      This content appears to be safe with a safety score of {analysisResult.safetyScore?.toFixed(2)}.
+                      This content appears to be safe with a safety score of {analysisResult?.safetyScore?.toFixed(2) ?? '1.00'}.
                       <br/>
                       <strong className="font-bold">Threat Level:</strong> <span className={threatColors[analysisResult.threatLevel]}>{analysisResult.threatLevel}</span>
                       <br/>
-                      <strong>Explanation:</strong> {analysisResult.explanation}
+                      <strong>Explanation:</strong> {analysisResult.explanation ?? 'No explanation provided.'}
                     </AlertDescription>
                   </Alert>
                 )}
                 <div className="mt-4">
                   <p className="text-sm font-medium text-gray-600 dark:text-gray-300">Threat Score:</p>
-                  <Progress value={analysisResult.safetyScore * 100} className={getProgressBarColor()} />
+                  <Progress value={(analysisResult?.safetyScore ?? 1) * 100} className={getProgressBarColor()} />
                 </div>
                 <div className="mt-4">
                   <p className="text-sm font-medium text-gray-600 dark:text-gray-300">AI Recommendations:</p>
                   <ul className="list-disc pl-5 text-gray-500 dark:text-gray-400">
-                    <li>{analysisResult.isPhishing ? "Delete email immediately." : "Content appears safe."}</li>
-                    <li>{analysisResult.isPhishing ? "Verify with the organization." : "No action needed."}</li>
-                    <li>{analysisResult.isPhishing ? "Report to IT team." : "Continue with caution."}</li>
+                    <li>{analysisResult?.isPhishing ? "Delete email immediately." : "Content appears safe."}</li>
+                    <li>{analysisResult?.isPhishing ? "Verify with the organization." : "No action needed."}</li>
+                    <li>{analysisResult?.isPhishing ? "Report to IT team." : "Continue with caution."}</li>
                   </ul>
                 </div>
               </animated.div>
@@ -330,5 +330,3 @@ export default function Home() {
     </div>
   );
 }
-
-

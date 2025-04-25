@@ -89,7 +89,17 @@ export async function analyzePhishingIndicators(
 
     const enrichedInput = { ...input, text: extractedText };
 
-    return await analyzePhishingIndicatorsFlow(enrichedInput);
+    const result = await analyzePhishingIndicatorsFlow(enrichedInput);
+
+      // Ensure default values are set if the LLM doesn't provide them
+      return {
+        isPhishing: result.isPhishing ?? false,
+        indicators: result.indicators ?? [],
+        safetyScore: result.safetyScore ?? 1,
+        explanation: result.explanation ?? 'No explanation provided.',
+        threatLevel: result.threatLevel ?? 'Safe',
+        riskFactors: result.riskFactors ?? [],
+      };
   } catch (error: any) {
     console.error('Error in analyzePhishingIndicators:', error);
     let errorMessage = 'Failed to analyze content. Please try again.';
@@ -202,12 +212,26 @@ const analyzePhishingIndicatorsFlow = ai.defineFlow<
     try {
       const {output} = await prompt(input);
       if (!output) {
-        throw new Error('LLM analysis failed to produce a valid output.');
+        return {
+            isPhishing: false,
+            indicators: [],
+            safetyScore: 1,
+            explanation: 'No analysis could be performed.',
+            threatLevel: 'Safe',
+            riskFactors: [],
+        };
       }
       return output!;
     } catch (error: any) {
       console.error('Error in analyzePhishingIndicatorsFlow:', error);
-      throw new Error('Failed to analyze content in flow. Please try again.');
+      return {
+        isPhishing: false,
+        indicators: [],
+        safetyScore: 1,
+        explanation: 'Failed to analyze content in flow. Please try again.',
+        threatLevel: 'Safe',
+        riskFactors: [],
+      };
     }
   }
 );

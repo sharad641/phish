@@ -6,6 +6,7 @@
 
 body {
   font-family: Arial, Helvetica, sans-serif;
+  transition: background-color 0.3s ease, color 0.3s ease; /* Add transition for dark mode */
 }
 
 @layer base {
@@ -43,6 +44,7 @@ body {
     --sidebar-accent-foreground: 240 5.9% 10%;
     --sidebar-border: 220 13% 91%;
     --sidebar-ring: 217.2 91.2% 59.8%;
+    transition: background-color 0.3s ease, color 0.3s ease;
   }
   .dark {
     --background: 220 30% 10%; /* Dark Blue */
@@ -83,8 +85,24 @@ body {
 @layer base {
   * {
     @apply border-border;
+    transition: all 0.3s ease; /* Add transition to all elements */
   }
   body {
     @apply bg-background text-foreground;
   }
+
+  /* Add cursor animation */
+  *:hover {
+    transform: scale(1.03);
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+  }
+}
+
+/* Icon transitions */
+.lucide {
+  transition: transform 0.3s ease, color 0.3s ease;
+}
+
+.lucide:hover {
+  transform: scale(1.2);
 }

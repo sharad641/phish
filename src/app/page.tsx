@@ -256,7 +256,7 @@ export default function Home() {
                       This content has been flagged as potentially malicious with a safety score of{" "}
                       {analysisResult.safetyScore?.toFixed(2) ?? '0.00'}.
                       <br/>
-                      <strong className="font-bold">Threat Level:</strong> <span className={threatColors[analysisResult.threatLevel]}>{analysisResult.threatLevel}</span>
+                      <strong className="font-bold">Threat Level:</strong> <span className={threatColors[analysisResult.threatLevel as keyof typeof threatColors] ?? 'text-gray-500'}>{analysisResult.threatLevel ?? 'Unknown'}</span>
                       <br/>
                       <strong>Indicators:</strong> {analysisResult.indicators?.join(", ") ?? 'No indicators found.'}
                       <br/>
@@ -272,7 +272,7 @@ export default function Home() {
                     <AlertDescription className="dark:text-green-200">
                       This content appears to be safe with a safety score of {analysisResult?.safetyScore?.toFixed(2) ?? '1.00'}.
                       <br/>
-                      <strong className="font-bold">Threat Level:</strong> <span className={threatColors[analysisResult.threatLevel]}>{analysisResult.threatLevel}</span>
+                      <strong className="font-bold">Threat Level:</strong> <span className={threatColors[analysisResult.threatLevel as keyof typeof threatColors] ?? 'text-gray-500'}>{analysisResult.threatLevel ?? 'Unknown'}</span>
                       <br/>
                       <strong>Explanation:</strong> {analysisResult.explanation ?? 'No explanation provided.'}
                     </AlertDescription>

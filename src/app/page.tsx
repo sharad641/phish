@@ -248,7 +248,7 @@ export default function Home() {
           {transitions((style, item) =>
             item ? (
               <animated.div style={style} className="mt-6">
-                {analysisResult.isPhishing ? (
+                {analysisResult?.isPhishing ? (
                   <Alert variant="destructive" className="rounded-md shadow-xl dark:bg-red-900 dark:border-red-800">
                     <ShieldAlert className="h-4 w-4"/>
                     <AlertTitle className="dark:text-red-50">Potential Phishing Threat Detected</AlertTitle>
@@ -330,4 +330,5 @@ export default function Home() {
     </div>
   );
 }
+
 

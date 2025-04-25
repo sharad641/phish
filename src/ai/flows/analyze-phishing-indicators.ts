@@ -21,7 +21,7 @@ const AnalyzePhishingIndicatorsInputSchema = z.object({
     .describe(
       "A photo to analyze, as a data URI that must include a MIME type and use Base64 encoding. Expected format: 'data:<mimetype>;base64,<encoded_data>'."
     )
-    .nullable() // Allow null for photoDataUri
+    .nullable()
     .optional(),
   emlFileDataUri: z
     .string()
@@ -87,19 +87,20 @@ export async function analyzePhishingIndicators(
       extractedText += `\nEmail Content: ${emlContent}`;
     }
 
+    // Enrich the input with extracted text
     const enrichedInput = { ...input, text: extractedText };
 
     const result = await analyzePhishingIndicatorsFlow(enrichedInput);
 
-      // Ensure default values are set if the LLM doesn't provide them
-      return {
-        isPhishing: result.isPhishing ?? false,
-        indicators: result.indicators ?? [],
-        safetyScore: result.safetyScore ?? 1,
-        explanation: result.explanation ?? 'No explanation provided.',
-        threatLevel: result.threatLevel ?? 'Safe',
-        riskFactors: result.riskFactors ?? [],
-      };
+    // Ensure default values are set if the LLM doesn't provide them
+    return {
+      isPhishing: result.isPhishing ?? false,
+      indicators: result.indicators ?? [],
+      safetyScore: result.safetyScore ?? 1,
+      explanation: result.explanation ?? 'No explanation provided.',
+      threatLevel: result.threatLevel ?? 'Safe',
+      riskFactors: result.riskFactors ?? [],
+    };
   } catch (error: any) {
     console.error('Error in analyzePhishingIndicators:', error);
     let errorMessage = 'Failed to analyze content. Please try again.';
@@ -169,12 +170,16 @@ const prompt = ai.definePrompt({
 Analyze the following content for potential phishing indicators. Identify and list specific risk factors such as:
 - Urgency cues (e.g., "act immediately", "urgent action required")
 - Suspicious domains (e.g., unusual or misspelled URLs)
-- Emotional language (e.g., threats, promises of reward)
+- Emotional language (e.g., threats, promises of reward, appeals to fear or sympathy)
 - Spoof indicators (e.g., mismatched sender information, generic greetings)
+- Unusual requests (e.g., requests for personal information, financial details, or account credentials)
+- Grammatical errors or typos (which are common in phishing attempts)
 
-For any URLs found, use the scanURL tool to determine if they are safe.
+For any URLs found, use the scanURL tool to determine if they are safe. Always check the URL safety before determining if the content is phishing.
 
-Based on your analysis, determine if the content is likely a phishing attempt and provide a safety score between 0 and 1, where 0 is definitely phishing and 1 is definitely safe. Also, provide a threat level as Safe, Suspicious, or Dangerous. Explain your reasoning.
+Based on your analysis, determine if the content is likely a phishing attempt and provide a safety score between 0 and 1, where 0 is definitely phishing and 1 is definitely safe. Also, provide a threat level as Safe, Suspicious, or Dangerous. Explain your reasoning in detail.
+
+Pay close attention to requests for account information, passwords, or financial transactions. These are strong indicators of phishing.
 
 {{#if text}}
 Text: {{{text}}}
@@ -213,24 +218,24 @@ const analyzePhishingIndicatorsFlow = ai.defineFlow<
       const {output} = await prompt(input);
       if (!output) {
         return {
-            isPhishing: false,
-            indicators: [],
-            safetyScore: 1,
-            explanation: 'No analysis could be performed.',
-            threatLevel: 'Safe',
-            riskFactors: [],
+          isPhishing: true, // Treat as phishing if no analysis could be performed
+          indicators: ['No analysis performed'],
+          safetyScore: 0.2, // Low safety score
+          explanation: 'No analysis could be performed, possibly due to technical issues. Treat with extreme caution.',
+          threatLevel: 'Dangerous',
+          riskFactors: ['Technical failure'],
         };
       }
       return output!;
     } catch (error: any) {
       console.error('Error in analyzePhishingIndicatorsFlow:', error);
       return {
-        isPhishing: false,
-        indicators: [],
-        safetyScore: 1,
-        explanation: 'Failed to analyze content in flow. Please try again.',
-        threatLevel: 'Safe',
-        riskFactors: [],
+        isPhishing: true, // Treat as phishing on error
+        indicators: ['Analysis failed'],
+        safetyScore: 0.1, // Very low safety score
+        explanation: 'Failed to analyze content in flow. Please treat as potentially dangerous.',
+        threatLevel: 'Dangerous',
+        riskFactors: ['Technical failure'],
       };
     }
   }

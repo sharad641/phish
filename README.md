@@ -1,62 +1,176 @@
-App Name: PhishGuard AI
-Core Features:
-Content Analysis: Analyze email/message content for phishing indicators, using a pre-trained machine learning model. This tool flags suspicious keywords, urgency cues, and unusual formatting.
-URL Inspection: Inspect URLs for safety, checking domain reputation and redirection. Display a clear warning message if the URL is flagged as potentially malicious.
-Real-time Analysis Dashboard: Provide a simple user interface to input text or URLs and display the analysis results with a safety score.
-Style Guidelines:
-Primary color: White or light gray for clean interface.
-Secondary color: Dark gray for text and subtle UI elements.
-Accent: Red (#FF4136) for alerts and warnings to indicate potential threats.
-Clear, sans-serif fonts for readability.
-Use recognizable icons for security (e.g., shield, lock, warning sign).
-Simple, single-column layout for easy content scanning.
-Original User Request:
-Sure! Here's a detailed project prompt you can use for documentation, submission, or presentation purposes:
+# 🛡️ PhishGuard AI — Real-Time Phishing Detection with AI
 
-📌 Project Title:
-Phishing and Social Engineering Defense using AI
+**PhishGuard AI** is a lightweight, real-time phishing and social engineering detection tool powered by machine learning and natural language processing. It inspects emails, messages, and URLs for malicious patterns and warns users about potential threats with a simple, clean interface.
 
-🔍 Problem Statement:
-Phishing attacks and social engineering tactics are on the rise, exploiting human vulnerabilities rather than technical flaws. Traditional rule-based security filters often fail to detect sophisticated and personalized phishing messages. There is a growing need for a smart, AI-powered solution that can analyze the content of emails, messages, and URLs in real-time to detect malicious intent and protect users from cyber threats.
+![PhishGuard AI Banner](https://github.com/yourusername/phishguard-ai/blob/main/public/banner.png)
 
-🎯 Objective:
-To develop an AI-powered tool that can automatically detect and prevent phishing and social engineering attempts by analyzing the textual content and URLs from emails, messages, or chat platforms in real-time. The tool should alert users with clear warnings and insights when suspicious content is detected.
+---
 
-🧠 Key Features:
-Real-time analysis of emails, messages, or URLs
-NLP-based detection of manipulation tactics (e.g., urgency, threats, emotional language)
-Machine learning model to classify content as “Safe” or “Phishing”
-URL inspection for domain reputation, redirection, and HTTPS usage
-User-friendly frontend interface for testing and alerts
-Option to integrate as a browser extension or email plugin (future scope)
-🛠️ Technology Stack:
-Layer	Technology
-Frontend	React.js
-Backend	Python (Flask)
-ML/NLP	Scikit-learn, CountVectorizer, Random Forest, BERT (future upgrade)
-Database	MongoDB or local file-based (optional)
-APIs Used	VirusTotal / URLScan.io (optional for advanced version)
-⚙️ System Architecture:
-Frontend (React UI): Users paste or input the content to analyze.
-API (Flask): Receives text/URL, processes it, and returns a prediction.
-Feature Extraction: NLP methods extract critical indicators (links, urgency, etc.).
-ML Model: Pre-trained classifier detects phishing or safe content.
-Response: Output shown to the user with clear result and reasoning.
-📈 Model Details:
-Trained on a dataset of labeled phishing and legitimate messages.
-Extracted features include presence of links, urgency-related words, text length.
-Model used: Random Forest (option to upgrade to BERT/transformers).
-Accuracy: ~90% on a small dataset (expandable with larger real-world data).
-🚀 Future Enhancements:
-Add a BERT/RoBERTa transformer model for advanced language understanding.
-Integrate with Gmail/Outlook or Chrome as an extension.
-URL sandboxing and visual phishing detection.
-Voice phishing detection (vishing) using audio processing models.
-Admin dashboard for monitoring reported phishing attempts.
-📂 Deliverables:
-Complete source code (frontend + backend + model)
-Pre-trained model .pkl files
-API endpoints documentation
-UI with real-time detection feature
-README with setup and usage instructions
-give me from scratch
+## 📌 Project Title
+**Phishing and Social Engineering Defense using AI**
+
+---
+
+## 🔍 Problem Statement
+
+Phishing and social engineering attacks are increasingly sophisticated, targeting human behavior rather than exploiting system vulnerabilities. Traditional filters struggle to keep up. This project introduces an intelligent, AI-based defense system that can identify and flag suspicious content or links before users fall victim.
+
+---
+
+## 🎯 Objective
+
+To build an AI-powered system that detects phishing attempts in real time by analyzing message content and URLs, alerting users with intuitive insights and warnings.
+
+---
+
+## 🧠 Core Features
+
+✅ **Content Analysis**  
+- NLP-based feature extraction (urgency cues, emotional triggers, link presence)  
+- Classify content as `Safe` or `Phishing` using a trained ML model
+
+✅ **URL Inspection**  
+- Domain reputation checking  
+- Detect suspicious redirects, domain spoofing, missing HTTPS
+
+✅ **Real-Time Dashboard**  
+- Input fields for email/text and URL  
+- Visual safety score and red warning indicators  
+- Simple and responsive layout for quick analysis
+
+---
+
+## 🖥️ UI Design Guidelines
+
+- **Primary**: White or Light Gray
+- **Secondary**: Dark Gray (text/UI)
+- **Accent**: Red `#FF4136` for phishing alerts  
+- **Typography**: Clean, Sans-serif fonts  
+- **Icons**: Shield, Lock, Warning signs  
+- **Layout**: Single-column, responsive, mobile-friendly
+
+---
+
+## 🛠️ Tech Stack
+
+| Layer       | Technology                          |
+|-------------|--------------------------------------|
+| Frontend    | React.js                            |
+| Backend     | Python + Flask                      |
+| Machine Learning | Scikit-learn, CountVectorizer, Random Forest |
+| Database (optional) | MongoDB or local file-based |
+| Optional APIs | [VirusTotal](https://www.virustotal.com/), [URLScan.io](https://urlscan.io/) |
+
+---
+
+## ⚙️ System Architecture
+
+```text
+[React Frontend]
+      |
+      v
+[Flask API Backend]
+      |
+      v
+[NLP & ML Model]
+      |
+      v
+[Phishing or Safe Result]
+
+User inputs email content or URL
+
+Flask API sends the text to ML model
+
+Text is preprocessed with NLP techniques
+
+ML model (Random Forest) predicts threat level
+
+Response is displayed with a safety score and warning indicator
+
+🧪 Model Details
+Algorithm: Random Forest Classifier
+
+Features: Links, suspicious keywords, urgency, text length
+
+Accuracy: ~90% on phishing dataset
+
+Data: Preprocessed and labeled phishing + legitimate messages
+
+Future: Option to upgrade to BERT/RoBERTa models
+
+📦 Folder Structure
+
+phishguard-ai/
+├── backend/
+│   ├── app.py                # Flask server
+│   ├── model.pkl             # Pre-trained ML model
+│   └── utils.py              # Text processing
+├── frontend/
+│   ├── public/
+│   │   └── favicon, banner, etc.
+│   ├── src/
+│   │   ├── components/       # UI components
+│   │   ├── App.js
+│   │   └── index.js
+├── dataset/                  # (Optional) Raw and cleaned datasets
+├── .env                      # API keys
+├── README.md
+└── requirements.txt
+
+⚙️ Setup Instructions
+✅ Prerequisites
+Python 3.x, Node.js, npm
+
+OMDB / VirusTotal API key (optional)
+
+model.pkl file in backend/
+
+🔧 Backend (Flask)
+
+cd backend/
+pip install -r requirements.txt
+python app.py
+
+💻 Frontend (React)
+cd frontend/
+npm install
+npm start
+
+📈 Example Usage
+📨 Sample Email Input:
+"Your account has been suspended! Click the link below to reactivate: http://fakebank-login.com"
+
+✅ Output:
+⚠️ Alert: "Phishing attempt detected"
+
+🔒 Confidence Score: 91%
+
+🛑 Keywords: "suspended", "click here", non-HTTPS URL
+
+🚀 Future Enhancements
+🔍 BERT integration for better contextual understanding
+
+📩 Gmail/Outlook browser extension
+
+🧪 URL sandboxing (headless browser inspection)
+
+🎙️ Vishing detection via voice transcript analysis
+
+📊 Admin dashboard for logging/reporting phishing attempts
+
+📂 Deliverables
+✅ Source Code (Frontend + Backend)
+
+✅ Pre-trained model (.pkl)
+
+✅ REST API for ML inference
+
+✅ Real-time interactive UI
+
+✅ README and documentation
+
+🙋 Author
+Sharad S
+📧 Email
+🔗 GitHub
+
